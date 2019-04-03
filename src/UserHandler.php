@@ -33,8 +33,9 @@ class UserHandler extends HandlerAbstract {
     }
 
     protected function createAction($params = []) {
-        $this->User->fill($this->data);
-        $this->User->options = $this->UserOptions->getAttributes($this->User->options);
+        $this->User->fillWithOptions($this->data, $this->UserOptions);
+        // $this->User->fill($this->data);
+        // $this->User->options = $this->UserOptions->getAttributes($this->User->options);
         $this->User->save();
 
         // Attach picture

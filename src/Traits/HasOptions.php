@@ -1,7 +1,9 @@
 <?php namespace drkwolf\Larauser\Traits;
 
-trait HasOptions {
+use Illuminate\Support\Arr;
 
+
+trait HasOptions {
     protected $optionsAttributes = [ ];
 
     public function initializeHasOptions () {
@@ -14,4 +16,11 @@ trait HasOptions {
         return json_decode($this->attributes['options']);
     }
 
+    // add update function
+    public function fillWithOptions(array $data, $optionsHandler) {
+        $newOptions = Arr::get($data, 'options');
+        $data = Arr::except($data, 'options');
+        $this->fill($data);
+        $this->options = $optionsHandler->UpdateOptions($newOptions, $this->options);
+    }
 }

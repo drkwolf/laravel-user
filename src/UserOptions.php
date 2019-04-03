@@ -4,25 +4,22 @@ use Illuminate\Support\Arr;
 use drkwolf\Package\ValidatableHandler;
 
 class UserOptions extends ValidatableHandler {
-    protected $data = [];
     private $schemas = [ ];
-    protected $sections;
+    private $sections;
+    
+    protected $defaultSections;
 
-    public function __construct(array $data, array $sections = []) {
-        $this->data = $data;
-        $this->sections = $sections;
+    public function __construct(array $sections = []) {
+        $this->sections = $sections? $sections : $this->defaultSections;
     }
 
-    /** 
-     * update user attributes
-     */
-    public function getAttributes($oldData) {
+    public function updateOptions($newOptions, $oldOptions) {
         foreach ($this->getSchema($this->sections, []) as $key => $value) {
-            if (Arr::has($this->data, $key)) {
-                Arr::set($oldData, $key, Arr::get($this->data, $key));
+            if (Arr::has($newOptions, $key)) {
+                Arr::set($oldOptions, $key, Arr::get($newOptions, $key));
             }
         }
-        return $oldData;
+        return $oldOptions;
     }
 
     public function getSchema($sections = [], $default = []) {

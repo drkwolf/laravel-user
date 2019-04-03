@@ -97,7 +97,7 @@ trait HasContacts {
 
     public function getPhoneAttribute() {
         if (isset($this->attributes['phone']) ) {
-            return $this->phoneAsoObject($this->attributes['phone']);
+            return $this->phoneAsObject($this->attributes['phone']);
         } else {
             $path = $this->defaultContactName . '.phone';
             return Arr::get($this->contacts, $path , ['prefix' => '', 'suffix' => '']);
