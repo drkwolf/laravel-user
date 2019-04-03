@@ -1,0 +1,22 @@
+{
+    "name": "drkwolf/laravel-user",
+    "description": "laravel auth",
+    "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "drkwolf",
+            "email": "drkwolf@gmail.com"
+        }
+    ],
+    "require": {
+        "drkwolf/laravel-handler": "dev-master",
+        "laravel/passport": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "drkwolf\\Larauser\\": "src/"
+        }
+    }
+}
