@@ -19,21 +19,25 @@ class UserHandler extends HandlerAbstract {
      * @param null $player User|int
      * @param string $media_prefix to get upload from request
      */
-    public function __construct($presenter, $data, UserOptions $userOptions, $role, $user = null, $media_prefix = null) {
-        $this->data = Arr::except($data, 'options');
-        parent::__construct($presenter, $data);
+    public function __construct($presenter, $data, UserOptions $userOptions, $role, $user = null, $media_prefix = null) 
+        {
+        // $this->data = Arr::except($data, 'options');
+        $override = [
+            'id' => $this->getModelId($user),
+        ];
+        parent::__construct($presenter, $data, $override);
 
-        $this->data['id']      = $this->getModelId($user);
         $this->role            = $role;
         $this->media_prefix    = $media_prefix;
 
         $UserClass             = config('laratrust.models.user');
-        $this->User            = $this->getModel($user, $UserClass, 'findOrNew');
+        $method                = $user? 'findOrFail' : 'findOrNew';
+        $this->User            = $this->getModel($user, $UserClass, $method);
         $this->UserOptions     = $userOptions;
     }
 
     protected function createAction($params = []) {
-        $this->User->fillWithOptions($this->data, $this->UserOptions);
+        $this->User->fillWithOptions($this->filteredData, $this->UserOptions);
         $this->User->save();
 
         // Attach picture
@@ -47,7 +51,7 @@ class UserHandler extends HandlerAbstract {
     }
 
     protected function updateAction($params = []) {
-        $this->User->fillWithOptions($this->data, $this->UserOptions);
+        $this->User->fillWithOptions($this->filteredData, $this->UserOptions);
         $this->User->update();
 
         // Attach picture

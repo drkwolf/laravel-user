@@ -8,36 +8,29 @@ use function GuzzleHttp\json_decode;
  * $this->email and $this->phone are unique and can be used to log as user
  */
 trait HasContacts {
-
-    protected $defaultContactName = '_default_';
-
-    private function contactAttributes($name) {
-        return [
-            $name => [
-                'address' => [
-                    'address' => null,
-                    'postcode' => null,
-                    'state' => null,
-                    'city' => null,
-                    'country' => null,
-                    'latitude' => null,
-                    'longitude' => null,
-                ],
-                'email' =>  null,
-                'phone' => [
-                    'prefix' => null,
-                    'suffix' => null,
-                ]
-            ]
-        ];
-    }
+    private $defaultContactName;
 
     public function initializeHasContacts () {
+        $this->defaultContactName = config('larauser.contact.default', '_default_');
+
         $this->attributes['contacts'] = json_encode(
             $this->contactAttributes($this->defaultContactName)
         );
         $this->casts['contacts'] = 'array';
-        // $this->fillable[]  = 'contact';
+        $this->fillable[]  = 'contact';
+    }
+
+    private function contactAttributes($name) {
+        $attributes = config('larauser.contact.attributes', []);
+        return [ $name => $attributes ];
+    }
+
+    public function getCredentialsAttribute () {
+        return [
+            'username' => $this->username,
+            'phone' => $this->attributes['phone'],
+            'email' => $this->attributes['email'],
+        ];
     }
 
     /*
@@ -73,16 +66,18 @@ trait HasContacts {
      * return email attribute or the default email in the default contact object
      */
     public function getEmailAttribute() {
+        // lad('email' , $this->attributes['email']);
         return isset($this->attributes['email'])
             ? $this->attributes['email']
-            : Arr::get($this->contacts, $this->defaultContactName . 'email', null);
+            : Arr::get($this->contacts, $this->defaultContactName . '.email', null);
     }
 
     private function phoneAsObject($phone) {
-        $split_nbr = $phone[0] == '+' ? 3 : 4;
+        $split_nbr = $phone[0] == '+' ? 3 : 4; // 00## or +##
         return [
             'prefix' => substr($phone, 0, $split_nbr),
             'suffix' => substr($phone, $split_nbr),
+            'number' => $phone
         ];
     }
 
@@ -113,7 +108,7 @@ trait HasContacts {
         $this->updateContactsAttribute($path, $value);
     }
 
-    public function addAdress($name, $value) {
+    public function addAddress($name, $value) {
         $path = $name . '.address';
         $this->updateContactsAttribute($path, $value);
     }
@@ -132,5 +127,4 @@ trait HasContacts {
         Arr::set($contacts, $path, $value);
         $this->contacts = $contacts;
     }
-
 }

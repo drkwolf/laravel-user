@@ -4,7 +4,7 @@ use Illuminate\Support\Arr;
 use drkwolf\Package\ValidatableHandler;
 
 class UserOptions extends ValidatableHandler {
-    private $schemas = [ ];
+    protected $schemas;
     private $sections;
     
     public function __construct(array $sections = []) {
@@ -20,6 +20,13 @@ class UserOptions extends ValidatableHandler {
         return $oldOptions;
     }
 
+    public function getSectionSchema() {
+        return $this->getSchema($this->sections, []);
+    }
+
+    /**
+     * return the schema from sections
+     */
     public function getSchema($sections = [], $default = []) {
         if ($sections) {
             $resp = [];

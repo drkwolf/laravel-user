@@ -24,7 +24,6 @@ class User extends Authenticatable implements HasMedia {
     use HasMediaTrait;
     use HasTutors;
 
-
     protected $attributes = [
         'active' => 0, // not active
         'country' => 'CH'
