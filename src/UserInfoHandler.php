@@ -40,13 +40,8 @@ class UserInfoHandler extends HandlerAbstract {
             'last_name',
             'birthdate',
             'sex',
-            'address',
-            'postcode',
-            'city',
-            'state',
-            'country',
-            'contacts.emails',
-            'contacts.phones',
+            'contact',
+            'contact',
         ];
     }
 
@@ -57,17 +52,11 @@ class UserInfoHandler extends HandlerAbstract {
             'last_name'     => 'required|string|max:50',
             'birthdate'     => 'required|date',
             'sex'           => [ 'required', Rule::in(['M', 'F']), ],
-//            'email'         =>  $email,
-            'address'       => 'required',
-            'postcode'      => 'required',
-            'city'          => 'required',
-            'state'         => 'required',
-            'country'       => 'string',
 
-            'contacts'      => 'array',
-            'contacts.phones.*.prefix'      => 'required',
-            'contacts.phones.*.suffix'      => 'required',
-            'contacts.emails.*.email'      => 'email',
+            'contact'      => 'array',
+            'contact.phones.*.prefix'      => 'required',
+            'contact.phones.*.suffix'      => 'required',
+            'contact.emails.*.email'      => 'email',
         ];
 
         $new_rules = array_get($params, 'rules', []);

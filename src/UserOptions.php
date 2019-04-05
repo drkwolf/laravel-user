@@ -7,10 +7,8 @@ class UserOptions extends ValidatableHandler {
     private $schemas = [ ];
     private $sections;
     
-    protected $defaultSections;
-
     public function __construct(array $sections = []) {
-        $this->sections = $sections? $sections : $this->defaultSections;
+        $this->sections = $sections;
     }
 
     public function updateOptions($newOptions, $oldOptions) {
@@ -34,6 +32,8 @@ class UserOptions extends ValidatableHandler {
     }
 
     public function rules($action = null, $params = []) {
-        return $this->schema;
+        return [
+            'options' => $this->getSchema($this->sections)
+        ];
     }
 }

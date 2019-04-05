@@ -1,7 +1,6 @@
 <?php namespace drkwolf\Larauser;
 
 use drkwolf\Package\HandlerAbstract;
-use drkwolf\Larauser\Entities\User;
 use drkwolf\Larauser\Events\UserCreatedEvent;
 use drkwolf\Larauser\Events\UserUpdatedEvent;
 use Illuminate\Support\Arr;
@@ -28,14 +27,13 @@ class UserHandler extends HandlerAbstract {
         $this->role            = $role;
         $this->media_prefix    = $media_prefix;
 
-        $this->User            = $this->getModel($user, User::class, 'findOrNew');
+        $UserClass             = config('laratrust.models.user');
+        $this->User            = $this->getModel($user, $UserClass, 'findOrNew');
         $this->UserOptions     = $userOptions;
     }
 
     protected function createAction($params = []) {
         $this->User->fillWithOptions($this->data, $this->UserOptions);
-        // $this->User->fill($this->data);
-        // $this->User->options = $this->UserOptions->getAttributes($this->User->options);
         $this->User->save();
 
         // Attach picture
@@ -49,8 +47,7 @@ class UserHandler extends HandlerAbstract {
     }
 
     protected function updateAction($params = []) {
-        $this->User->fill($this->data);
-        $this->User->options = $this->UserOptions->getAttributes($this->User->options);
+        $this->User->fillWithOptions($this->data, $this->UserOptions);
         $this->User->update();
 
         // Attach picture
@@ -64,19 +61,17 @@ class UserHandler extends HandlerAbstract {
     }
 
     public function rules($action = null, $params = []) {
-        return [
-            'id' => $this->data['id']? 'required|integer|exists:users,id' : 'nullable',
-
+        $rules = [
             'first_name'    => 'required|string|max:50',
             'last_name'     => 'required|string|max:50',
             'birthdate'     => 'date|nullable',
-            'sex'           => [ 'required', Rule::in(['M', 'F']), ],
-            'email'         => 'required|email|unique:users,email',
-            'address'       => 'required',
-            'postcode'      => 'required',
-            'city'          => 'required',
-            'state'         => 'required',
+            'sex'           => [ 'nullable', Rule::in(['M', 'F']), ],
+            'email'         => 'nullable,email|unique:users,email',
+            'phone'         => 'nullable|unique:users,phone',
         ];
+        return array_merge(
+            $rules, $this->UserOptions->rules(actions, $params)
+        );
     }
 
 }
