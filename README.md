@@ -1,4 +1,6 @@
 # Introduction 
+Manage User model that has multiple roles, complex data that change with the role or the context, 
+
 - handle optional data as json field
 - handle Json contacts
 - add tutor
@@ -6,6 +8,13 @@
   - User
   - Team
   - Group
+
+# Dependencies 
+
+- drkwolf/laravel-handler
+- laratrust
+- laravel passport
+- MediaLibrary for pictures
 
 # Database
 ```php
@@ -38,7 +47,60 @@ Schema::create('tutor_user', function(Blueprint $table) {
     $table->timestamps();
 });
 ```
-# Options
+
+# Managing Users
+
+ - To create a user:
+    to create a user you have to 
+        - create the useroptions to intiate the UserHandler, UserOptions define the 
+       schema of the options as validation $Rules, it can pass validation rules to The UserHandler and 
+       validate the option, option can filter by section (array element)
+        - define the user handler : 
+            - filter data, 
+            - validate it  
+            - execute Actions, 
+```php
+
+use drkwolf\Larauser\UserHandler;
+use App\Packages\Users\RolesTypes;
+use Illuminate\Validation\Rule;
+use App\Packages\Users\Entities\User;
+
+use drkwolf\Larauser\UserOptions;
+class DefaultUserOptions extends UserOptions {
+    protected $schemas = [
+        'fiedl1' => [
+            'iban' => 'string',
+        ],
+        'field2' => [
+        'insurance' => [
+            'name'            => 'string',
+            ]
+        ],
+        'therapist' => [
+        ]
+    ];
+}
+
+class CustomerHandler extends DefaultUserOptions {
+
+    public function __construct($presenter, $data, $user = null) {
+        $userOptions = new DefaultUserOptions(['field', 'field2']);
+       parent::__construct($presenter, $data, $userOptions, RolesTypes::CUSTOMER, $user);
+    }
+
+    // override the default rules
+    public function rules($action = null, $params = []) {
+        $rules = [ ];
+        return array_merge(
+            $rules,
+            $this->UserOptions->rules($action, $params);
+        )
+    }
+}
+```
+
+## User Options
 
 ## HasOptions Trait
 HasiOption is an Eloquent trait that defined and init optional fields
@@ -58,8 +120,8 @@ class User extends Model {
 ```
 
 ## UserOptions class
-if you have different user's roles, with each one has his optional data
-
+User Option handle the insertion and the validation to a subset schema, it's helpfull if you need have more control on
+the data inserted/update in the json field
 Feature:
     - filter option 
 
@@ -111,7 +173,6 @@ TODO
 #Tutor
 
 // TODO
-
 
 #Contact
 
