@@ -35,15 +35,14 @@ class User extends Authenticatable implements HasMedia {
 //
     // not fillable picture, password
     protected $fillable = [
-        'username', 'active','phone', 'email',
+        'username', 'phone', 'email',
         'first_name', 'last_name',  'sex', 'birthdate',
-        'address', 'postcode', 'city', 'state', 'country',
-        'notes'
     ];
 
+    protected $guarded = ['active'];
+    protected $hidden = ['password'];
     protected $appends  = ['name'];
     protected $dates    = ['birthdate'];
-    protected $hidden   = ['password'];
 
     // region attributes
     /** 
@@ -61,11 +60,13 @@ class User extends Authenticatable implements HasMedia {
         return $this->birthdate->age;
     }
 
-    public function getPictureUrlAttribute() {
-        $pic = $this->getMedia('pictures')->last();
+    public function getAvatarUrlAttribute() {
+        $avatarCollection = config('larauser.model.avatar_collection', 'avatars');
+        $defaultAvatar = config('larauser.model.avatar_default');
+        $pic = $this->getMedia($avatarCollection)->last();
         return $pic
             ? $pic->getFullUrl()
-            : null ; // TODO defaultPicture
+            : \Storage::disk('public')->url($defaultAvatar); ; // TODO defaultPicture
     }
     // endregion attributes
 }

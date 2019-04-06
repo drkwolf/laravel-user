@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 
 class UserHandler extends HandlerAbstract {
     protected $media_prefix;
+    protected $avatar_field = 'avatar';
     private $role;
 
     public $User;
@@ -19,12 +20,9 @@ class UserHandler extends HandlerAbstract {
      * @param null $player User|int
      * @param string $media_prefix to get upload from request
      */
-    public function __construct($presenter, $data, UserOptions $userOptions, $role, $user = null, $media_prefix = null) 
-        {
+    public function __construct($presenter, $data, UserOptions $userOptions, $role, $user = null, $media_prefix = null) {
         // $this->data = Arr::except($data, 'options');
-        $override = [
-            'id' => $this->getModelId($user),
-        ];
+        $override = [ 'id' => $this->getModelId($user)];
         parent::__construct($presenter, $data, $override);
 
         $this->role            = $role;
@@ -36,15 +34,22 @@ class UserHandler extends HandlerAbstract {
         $this->UserOptions     = $userOptions;
     }
 
+    public function AttachAvatarAction($params = []) {
+        // Attach picture
+        $avatarCollection = config('larauser.model.avatar_collection', 'avatars');
+        $pic_path = ($this->media_prefix? $this->media_prefix . '.' : '') . $this->avatar_field;
+        if (request()->hasFile($pic_path)) {
+            $this->User->addMediaFromRequest($pic_path)
+            ->toMediaCollection($avatarCollection);
+        }
+    }
+
     protected function createAction($params = []) {
         $this->User->fillWithOptions($this->filteredData, $this->UserOptions);
         $this->User->save();
 
-        // Attach picture
-        $pic_path = $this->media_prefix? $this->media_prefix . '.picture' : 'picture';
-        if (request()->hasFile($pic_path)) {
-            $this->User->addMediaFromRequest($pic_path)->toMediaCollection('pictures');
-        }
+        $this->AttachAvatarAction($params);
+
         event(new UserCreatedEvent($this->User, $this->role));
 
         return $this->User;
@@ -54,11 +59,7 @@ class UserHandler extends HandlerAbstract {
         $this->User->fillWithOptions($this->filteredData, $this->UserOptions);
         $this->User->update();
 
-        // Attach picture
-        $pic_path = $this->media_prefix? $this->media_prefix . '.picture' : 'picture';
-        if (request()->hasFile($pic_path)) {
-            $this->User->addMediaFromRequest($pic_path)->toMediaCollection('pictures');
-        }
+        $this->AttachAvatarAction($params);
 
         event(new UserUpdatedEvent($this->User, $this->role));
         return $this->User;

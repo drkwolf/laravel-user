@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'model' => [
+        'avatar_collection' => 'avatars',
+        // disk public <=> app/public/defaults
+        'avatar_default' => 'defaults/avatar-102.png'
+    ],
     'contact' => [
         'default' => '_default_',
         // possible contact, contacts
@@ -26,7 +31,13 @@ return [
         // ]
     ],
     'options' => [
-        'attributes' => []
+        'attributes' => [
+            // 'field1' => [],
+            // 'field2' => [],
+        ],
+        'filters' => [
+            // 'customer' => ['field1']
+        ]
     ]
 
 ]
