@@ -23,7 +23,7 @@ Manage User model that has multiple roles, complex data that change with the rol
 | action        | fields                              | event                  |
 | ------------- | ----------------------------------- | ---------------------- |
 | update        | password, email*, username*, phone* | CredentialUpdatedEvent |
-| resetPassword | password                            |                        CredentialUpdatedEvent |
+| resetPassword | password                            | CredentialUpdatedEvent |
 
 *: optional fields
 
