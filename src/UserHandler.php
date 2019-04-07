@@ -3,7 +3,6 @@
 use drkwolf\Package\HandlerAbstract;
 use drkwolf\Larauser\Events\UserCreatedEvent;
 use drkwolf\Larauser\Events\UserUpdatedEvent;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class UserHandler extends HandlerAbstract {
