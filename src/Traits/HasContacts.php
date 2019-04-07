@@ -65,8 +65,7 @@ trait HasContacts {
     /**
      * return email attribute or the default email in the default contact object
      */
-    public function getEmailAttribute() {
-        // lad('email' , $this->attributes['email']);
+    public function getDefaultEmailAttribute() {
         return isset($this->attributes['email'])
             ? $this->attributes['email']
             : Arr::get($this->contacts, $this->defaultContactName . '.email', null);
@@ -103,7 +102,7 @@ trait HasContacts {
         $this->attributes['phone'] = Arr::get($value, 'prefix') . Arr::get($value, 'suffix');
     }
 
-    public function addPhone($name, $value) {
+    public function addContactPhone($name, $value) {
         $path = $name . '.phone';
         $this->updateContactsAttribute($path, $value);
     }
@@ -117,7 +116,7 @@ trait HasContacts {
         return Arr::get($this->contacts, $this->defaultContactName . '.address');
     }
 
-    public function addEmail($name, $value) {
+    public function addContactEmail($name, $value) {
         $path = $name . '.email';
         $this->updateContactsAttribute($path, $value);
     }
