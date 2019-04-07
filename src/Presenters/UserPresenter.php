@@ -1,4 +1,4 @@
-<?php namespace drkwolf\Larauser\Presetner;
+<?php namespace drkwolf\Larauser\Presetners;
 
 use drkwolf\Package\ClientActionsTrait;
 use drkwolf\Package\Presenter\OrmPresenterAbstract;

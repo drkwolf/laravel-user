@@ -1,4 +1,4 @@
-<?php namespace drkwolf\Larauser\Presenter;
+<?php namespace drkwolf\Larauser\Presenters;
 
 use drkwolf\Larauser\Entities\User;
 
