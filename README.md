@@ -16,7 +16,29 @@ Manage User model that has multiple roles, complex data that change with the rol
 - laravel passport
 - MediaLibrary for pictures
 
+## default Handlers
+
+- userCredentialHandler
+ 
+| action        | fields                              | event                  |
+| ------------- | ----------------------------------- | ---------------------- |
+| update        | password, email*, username*, phone* | CredentialUpdatedEvent |
+| resetPassword | password                            |                        CredentialUpdatedEvent |
+
+*: optional fields
+
+- UserHandler: Jons fields should be handled by you
+  - options : UserOptions/HasOption
+  - contacts: see HasContact
+
+| action       | fields       | event            |
+| ------------ | ------------ | ---------------- |
+| attachAvatar | attachAvatar |                  |
+| create       | *            | UserCreatedEvent |
+| update       | *            | UserUpdatedEvent |
+
 # Database
+
 ```php
 Schema::create('users', function(Blueprint $table) {
     $table->increments('id');
