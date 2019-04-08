@@ -25,17 +25,10 @@ trait HasOptions {
 
     // add update function
     public function fillWithOptions(array $data, $optionsHandler) {
-        $newOptions = Arr::get($data, 'options');
-        // dump('------HasOptions-----');
-        // dump('------Data-----');
-        // dump($data);
-        // dump('------newOptions-----');
-        // dump($newOptions);
+        $newOptions = Arr::get($data, 'options', []);
         $data = Arr::except($data, 'options');
         $this->fill($data);
-        // dump($newOptions, $this->options);
         $this->initUserOptionsAttributes($newOptions, $optionsHandler->getSectionSchema());
-        // dump($this->options);
     }
 
     private function initUserOptionsAttributes(array $newOptions, $schema) {
