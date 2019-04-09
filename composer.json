@@ -18,5 +18,12 @@
         "psr-4": {
             "drkwolf\\Larauser\\": "src/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "drkwolf\\Larauser\\LarauserServiceProvider"
+            ]
+        }
     }
 }
