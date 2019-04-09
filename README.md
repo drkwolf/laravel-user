@@ -1,7 +1,9 @@
-# Introduction 
+# Introduction
+
 Manage User model that has multiple roles, complex data that change with the role or the context, and multiple contacts
 
 Features:
+
 - handle optional data: filter and validation
 - handle contacts
 
@@ -48,6 +50,7 @@ Schema::create('tutor_user', function(Blueprint $table) {
 ## Configuration
 
 publish the configuration file
+
 ```bash
 php artisan vendor:publish --provider="drkwolf\Larauser\LarauserServiceProvider" --tag="config"
 ```
