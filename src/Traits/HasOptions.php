@@ -24,17 +24,19 @@ trait HasOptions {
     }
 
     // add update function
-    public function fillWithOptions(array $data, $optionsHandler) {
+    public function fillWithOptions(array $data, $filter) {
         $newOptions = Arr::get($data, 'options', []);
         $data = Arr::except($data, 'options');
         $this->fill($data);
-        $this->initUserOptionsAttributes($newOptions, $optionsHandler->getSectionSchema());
+      $this->initUserOptionsAttributes($newOptions, $filter);
     }
 
-    private function initUserOptionsAttributes(array $newOptions, $schema) {
+    private function initUserOptionsAttributes(array $newOptions, $filter) {
         $attributes = config('larauser.options.attributes', $this->optionsAttributes);
-        $options = $this->options;
+        $sections = config('larauser.options.filters.' . $filter, []);
+        $schema = $this->getFilteredOptions($attributes, $sections);
 
+        $options = $this->options;
         $newOptions = $this->filterByArrayKeys($newOptions, $schema);
 
         // set filtered options
@@ -42,6 +44,17 @@ trait HasOptions {
             if (Arr::has($newOptions, $key)) $options[$key] = $newOptions[$key];
         }
         $this->options = $options;
+    }
+
+    public function getFilteredOptions($attributes, $sections = [], $default = []) {
+        if ($sections) {
+            $resp = [];
+            foreach($sections as $item) {
+               $resp[$item]  = Arr::get($attributes, $item, $default);
+            }
+            return $resp;
+        } 
+        return $attributes;
     }
 
     // FIXME Extends Laravel Collection

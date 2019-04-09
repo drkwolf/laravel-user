@@ -47,7 +47,6 @@ class UserInfoHandler extends HandlerAbstract {
 
     public function rules($action = null, $params = []) {
         $rules = [
-
             'first_name'    => 'required|string|max:50',
             'last_name'     => 'required|string|max:50',
             'birthdate'     => 'required|date',

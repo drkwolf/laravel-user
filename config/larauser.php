@@ -7,9 +7,11 @@ return [
         'avatar_default' => 'defaults/avatar-102.png'
     ],
     'contact' => [
+        /** default contact name */
         'default' => '_default_',
         // possible contact, contacts
         'fillable' => ['contact'], 
+        /** default contact's attributes */
         'attributes' => [
             'address' => [
                 'address' => null,
@@ -26,9 +28,9 @@ return [
                 'suffix' => null,
             ]
         ],
-        // 'phone' => [
-        //     'default_country' => 'CH',
-        // ]
+        'validation' => [
+
+        ]
     ],
     'options' => [
         'attributes' => [
@@ -37,7 +39,9 @@ return [
         ],
         'filters' => [
             // 'customer' => ['field1']
+        ],
+        'validation' => [
+
         ]
     ]
-
-]
+];

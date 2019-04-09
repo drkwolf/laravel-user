@@ -1,43 +1,18 @@
 # Introduction 
-Manage User model that has multiple roles, complex data that change with the role or the context, 
+Manage User model that has multiple roles, complex data that change with the role or the context, and multiple contacts
 
-- handle optional data as json field
-- handle Json contacts
-- add tutor
-- laratrust extension traits
-  - User
-  - Team
-  - Group
+Features:
+- handle optional data: filter and validation
+- handle contacts
 
-# Dependencies 
+## Dependencies
 
-- drkwolf/laravel-handler
-- laratrust
-- laravel passport
-- MediaLibrary for pictures
+- drkwolf/laravel-handler : for request handler and data presenter
+- spatie/laravel-medialibrary : Optional, form user's avatar
+- laravel/passport : Optional, authentication
+- santigarcor/laratrust : Optional managing teams and groups
 
-## default Handlers
-
-- userCredentialHandler
- 
-| action        | fields                              | event                  |
-| ------------- | ----------------------------------- | ---------------------- |
-| update        | password, email*, username*, phone* | CredentialUpdatedEvent |
-| resetPassword | password                            | CredentialUpdatedEvent |
-
-*: optional fields
-
-- UserHandler: Jons fields should be handled by you
-  - options : UserOptions/HasOption
-  - contacts: see HasContact
-
-| action       | fields       | event            |
-| ------------ | ------------ | ---------------- |
-| attachAvatar | attachAvatar |                  |
-| create       | *            | UserCreatedEvent |
-| update       | *            | UserUpdatedEvent |
-
-# Database
+## Database
 
 ```php
 Schema::create('users', function(Blueprint $table) {
@@ -70,136 +45,95 @@ Schema::create('tutor_user', function(Blueprint $table) {
 });
 ```
 
-# Managing Users
+## Configuration
 
- - To create a user:
-    to create a user you have to 
-        - create the useroptions to intiate the UserHandler, UserOptions define the 
-       schema of the options as validation $Rules, it can pass validation rules to The UserHandler and 
-       validate the option, option can filter by section (array element)
-        - define the user handler : 
-            - filter data, 
-            - validate it  
-            - execute Actions, 
-```php
-
-use drkwolf\Larauser\UserHandler;
-use App\Packages\Users\RolesTypes;
-use Illuminate\Validation\Rule;
-use App\Packages\Users\Entities\User;
-
-use drkwolf\Larauser\UserOptions;
-class DefaultUserOptions extends UserOptions {
-    protected $schemas = [
-        'fiedl1' => [
-            'iban' => 'string',
-        ],
-        'field2' => [
-        'insurance' => [
-            'name'            => 'string',
-            ]
-        ],
-        'therapist' => [
-        ]
-    ];
-}
-
-class CustomerHandler extends DefaultUserOptions {
-
-    public function __construct($presenter, $data, $user = null) {
-        $userOptions = new DefaultUserOptions(['field', 'field2']);
-       parent::__construct($presenter, $data, $userOptions, RolesTypes::CUSTOMER, $user);
-    }
-
-    // override the default rules
-    public function rules($action = null, $params = []) {
-        $rules = [ ];
-        return array_merge(
-            $rules,
-            $this->UserOptions->rules($action, $params);
-        )
-    }
-}
+publish the configuration file
+```bash
+php artisan vendor:publish --provider="drkwolf\Larauser\LarauserServiceProvider" --tag="config"
 ```
 
-## User Options
+setup user model parameters
 
-## HasOptions Trait
-HasiOption is an Eloquent trait that defined and init optional fields
 ```php
-use drkwolf\Larauser\Traits\HasOptions;
-
-class User extends Model {
-    use HasOptions;
-
-    protected $optionsAttributes = [
+'model' => [
+    // field name ($request)
+    'avatar_field' => 'avatar',
+    // filesystem disk where default pic is
+    // public disk should have url attribute !
+    'avatar_disk' => 'public',
+    'avatar_collection' => 'avatars',
+    'avatar_default' => 'defaults/avatar-102.png',
+    // validation rules
+    'rules' => [
+        'default' => [
+            'first_name'    => 'required|string|max:50',
+            'last_name'     => 'required|string|max:50',
+            'birthdate'     => 'date|nullable',
+            'sex'           => 'nullable|in:M,F',
+            'email'         => 'nullable|email|unique:users,email',
+            // 'phone'         => 'nullable|unique:users,phone',
+        ],
         'customer' => [
-            'inssurance' => [ ]
-        ],
-        'provider' => [ ]
-    ];
-}
-```
-
-## UserOptions class
-User Option handle the insertion and the validation to a subset schema, it's helpfull if you need have more control on
-the data inserted/update in the json field
-Feature:
-    - filter option 
-
-first define options schema that contains all possible option
-
-```php
-use drkwolf\Larauser\UserOptions;
-
-class DefaultUserOptions extends UserOptions {
-
-    protected $schemas = [
-        'bank' => [
-            'iban' => 'string',
+            'birthdate'     => 'required|date|nullable',
+            'sex'           => 'required|in:M,F',
         ],
         'provider' => [
-            'insurance' => [ 'name' => 'string' ]
-        ],
-        'sport' => [ ]
-    ];
-
-    public function __construct($data, $section = []) {
-        parent::__construct($data, $section);
-    }
-}
+            'sex'           => 'required|in:M,F',
+        ]
+    ]
+]
 ```
-for user with role provider options
+
+## default Handlers
+
+### UserCredentialHandler
+
+Update credentials password, email, username and phone
+ 
+| action        | fields                              | event                  |
+| ------------- | ----------------------------------- | ---------------------- |
+| update        | password, email*, username*, phone* | CredentialUpdatedEvent |
+| resetPassword | password                            | CredentialUpdatedEvent |
+
+*: optional fields
+
+### UserHandler
+
+handle user main fields, options and contacts
+
+| action       | fields       | event            |
+| ------------ | ------------ | ---------------- |
+| attachAvatar | attachAvatar |                  |
+| create       | *            | UserCreatedEvent |
+| update       | *            | UserUpdatedEvent |
+
+### UserInfoHandler
+
+same as UserHandler but doesn't handle options field
+
+## Managing Users
 
 ```php
-use App\Packages\Users\DefaultUserOptions;
+use drkwolf\Package\Presenter\DefaultPresenter as Presenter;
+// creating 
+$presenter = new Presenter();
+$action = 'create'
+$response = UserHandler::resolve(
+    $action, $params = [],
+    $presenter, $request->data, 'admin');
 
-class ProviderOptions extends DefaultUserOptions {
-    const $defaultSections = ['provider', 'bank'];
-}
+// updating
+$presenter = new UserPresenter();
+$action = 'update'
+$response = UserHandler::resolve(
+    $action, $params = [],
+    $presenter, $request->data, 'admin');
 ```
 
-updating a section :
-```php
-# schema should have the same structure as the deta
-# we want to update only sports.player.football section
-$userOptions = new PlayerOptions(['bank', 'sport']);
-// OR
-$userOptions = new PlayerOptions();
-$user->fillWithOptions($data, $userOptions);
-```
+## HasOptions Trait
 
-TODO
-    - validate by using Laravel's rules Object
+see docs/options
 
-#Tutor
+## HasContacts Trait
 
-// TODO
-
-#Contact
-
-handling contact: address, emails, phones
-
-TODO:
-    - user hasOptions Trait 
-    - 
+see docs/contacts

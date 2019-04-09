@@ -1,8 +1,6 @@
 <?php namespace drkwolf\Larauser\Traits;
 
 use Illuminate\Support\Arr;
-use function GuzzleHttp\json_decode;
-
 
 /**
  * $this->email and $this->phone are unique and can be used to log as user
@@ -35,7 +33,7 @@ trait HasContacts {
 
     /*
     |---------------------------------------------------------------------
-    | Contact Attrubute
+    | default Contact Attrubute
     |---------------------------------------------------------------------
     */
     
@@ -56,11 +54,9 @@ trait HasContacts {
         return Arr::get($contacts, $this->defaultContactName);
     }
 
-    /*
-    |---------------------------------------------------------------------
-    | Credential
-    |---------------------------------------------------------------------
-    */
+    public function getDefaultAddressAttribute() {
+        return Arr::get($this->contacts, $this->defaultContactName . '.address');
+    }
 
     /**
      * return email attribute or the default email in the default contact object
@@ -70,6 +66,26 @@ trait HasContacts {
             ? $this->attributes['email']
             : Arr::get($this->contacts, $this->defaultContactName . '.email', null);
     }
+
+    /*
+    |---------------------------------------------------------------------
+    | Credential
+    |---------------------------------------------------------------------
+    */
+
+    public function getPhoneAttribute() {
+        if (isset($this->attributes['phone']) ) {
+            return $this->phoneAsObject($this->attributes['phone']);
+        } else {
+            $path = $this->defaultContactName . '.phone';
+            return Arr::get($this->contacts, $path , ['prefix' => '', 'suffix' => '']);
+        }
+    }
+
+    public function setPhoneAttribute($value) {
+        $this->attributes['phone'] = Arr::get($value, 'prefix') . Arr::get($value, 'suffix');
+    }
+
 
     private function phoneAsObject($phone) {
         $split_nbr = $phone[0] == '+' ? 3 : 4; // 00## or +##
@@ -89,36 +105,11 @@ trait HasContacts {
         }
     }
 
-    public function getPhoneAttribute() {
-        if (isset($this->attributes['phone']) ) {
-            return $this->phoneAsObject($this->attributes['phone']);
-        } else {
-            $path = $this->defaultContactName . '.phone';
-            return Arr::get($this->contacts, $path , ['prefix' => '', 'suffix' => '']);
-        }
-    }
-
-    public function setPhoneAttribute($value) {
-        $this->attributes['phone'] = Arr::get($value, 'prefix') . Arr::get($value, 'suffix');
-    }
-
-    public function addContactPhone($name, $value) {
-        $path = $name . '.phone';
-        $this->updateContactsAttribute($path, $value);
-    }
-
-    public function addAddress($name, $value) {
-        $path = $name . '.address';
-        $this->updateContactsAttribute($path, $value);
-    }
-
-    public function getDefaultAddressAttribute() {
-        return Arr::get($this->contacts, $this->defaultContactName . '.address');
-    }
-
-    public function addContactEmail($name, $value) {
-        $path = $name . '.email';
-        $this->updateContactsAttribute($path, $value);
+    protected function updateContactsFieldAttribute($name, $field, $value) {
+        $path = $name . '.' . $field;
+        $contacts = $this->contacts;
+        Arr::set($contacts, $path, $value);
+        $this->contacts = $contacts;
     }
 
     protected function updateContactsAttribute($path, $value) {
@@ -126,4 +117,5 @@ trait HasContacts {
         Arr::set($contacts, $path, $value);
         $this->contacts = $contacts;
     }
+
 }

@@ -4,8 +4,6 @@ use drkwolf\Larauser\Traits\HasContacts;
 use drkwolf\Larauser\Traits\HasOptions;
 use drkwolf\Larauser\Traits\HasTutors;
 
-use Carbon\Carbon;
-
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
@@ -63,10 +61,11 @@ class User extends Authenticatable implements HasMedia {
     public function getAvatarUrlAttribute() {
         $avatarCollection = config('larauser.model.avatar_collection', 'avatars');
         $defaultAvatar = config('larauser.model.avatar_default');
+        $defaultDisk = config('larauser.model.avatar_disk', 'public');
         $pic = $this->getMedia($avatarCollection)->last();
         return $pic
             ? $pic->getFullUrl()
-            : \Storage::disk('public')->url($defaultAvatar); ; // TODO defaultPicture
+            : \Storage::disk($defaultDisk)->url($defaultAvatar); ; // TODO defaultPicture
     }
     // endregion attributes
 }

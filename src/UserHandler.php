@@ -3,24 +3,19 @@
 use drkwolf\Package\HandlerAbstract;
 use drkwolf\Larauser\Events\UserCreatedEvent;
 use drkwolf\Larauser\Events\UserUpdatedEvent;
-use Illuminate\Validation\Rule;
 
 class UserHandler extends HandlerAbstract {
     protected $media_prefix;
-    protected $avatar_field = 'avatar';
     private $role;
 
     public $User;
-    public $UserOptions;
 
     /**
-
      * @param $data array
      * @param null $player User|int
      * @param string $media_prefix to get upload from request
      */
-    public function __construct($presenter, $data, UserOptions $userOptions, $role, $user = null, $media_prefix = null) {
-        // $this->data = Arr::except($data, 'options');
+    public function __construct($presenter, $data, $role, $user = null, $media_prefix = null) {
         $override = [ 'id' => $this->getModelId($user)];
         parent::__construct($presenter, $data, $override);
 
@@ -30,13 +25,13 @@ class UserHandler extends HandlerAbstract {
         $UserClass             = config('laratrust.models.user');
         $method                = $user? 'findOrFail' : 'findOrNew';
         $this->User            = $this->getModel($user, $UserClass, $method);
-        $this->UserOptions     = $userOptions;
     }
 
     public function AttachAvatarAction($params = []) {
         // Attach picture
         $avatarCollection = config('larauser.model.avatar_collection', 'avatars');
-        $pic_path = ($this->media_prefix? $this->media_prefix . '.' : '') . $this->avatar_field;
+        $avatarField = config('larauser.model.avatar_field', 'avatar');
+        $pic_path = ($this->media_prefix? $this->media_prefix . '.' : '') . $avatarField;
         if (request()->hasFile($pic_path)) {
             $this->User->addMediaFromRequest($pic_path)
             ->toMediaCollection($avatarCollection);
@@ -44,7 +39,7 @@ class UserHandler extends HandlerAbstract {
     }
 
     protected function createAction($params = []) {
-        $this->User->fillWithOptions($this->filteredData, $this->UserOptions);
+        $this->User->fillWithOptions($this->filteredData, $this->role);
         $this->User->save();
 
         $this->AttachAvatarAction($params);
@@ -55,7 +50,7 @@ class UserHandler extends HandlerAbstract {
     }
 
     protected function updateAction($params = []) {
-        $this->User->fillWithOptions($this->filteredData, $this->UserOptions);
+        $this->User->fillWithOptions($this->filteredData, $this->role);
         $this->User->update();
 
         $this->AttachAvatarAction($params);
@@ -65,17 +60,12 @@ class UserHandler extends HandlerAbstract {
     }
 
     public function rules($action = null, $params = []) {
-        $rules = [
-            'first_name'    => 'required|string|max:50',
-            'last_name'     => 'required|string|max:50',
-            'birthdate'     => 'date|nullable',
-            'sex'           => [ 'nullable', Rule::in(['M', 'F']), ],
-            'email'         => 'nullable,email|unique:users,email',
-            'phone'         => 'nullable|unique:users,phone',
-        ];
-        return array_merge(
-            $rules, $this->UserOptions->rules(actions, $params)
-        );
+        $contactRules = config('larauser.contacts.rules.' . $this->role, []);
+        $optionsRules = config('larauser.options.rules.' . $this->role, []);
+        $rules = config('larauser.model.rules.default', []);
+        $userRules = config('larauser.model.rules.' . $this->role, []);
+
+        return array_merge($rules, $userRules, $contactRules, $optionsRules);
     }
 
 }
