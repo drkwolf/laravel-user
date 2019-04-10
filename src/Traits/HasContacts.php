@@ -114,8 +114,19 @@ trait HasContacts {
 
     protected function updateContactsAttribute($path, $value) {
         $contacts = $this->contacts;
+        $value = $this->formatContact($value);
         Arr::set($contacts, $path, $value);
         $this->contacts = $contacts;
+    }
+
+    public function formatContact($contact) {
+        foreach ($contact as $item => $value ) {
+            if ($item === 'phone') {
+                $contact['phone']['prefix'] = str_replace(' ', '', $value['prefix'] );
+                $contact['phone']['suffix'] = str_replace(' ', '', $value['suffix'] );
+            }
+        }
+        return $contact;
     }
 
 }
