@@ -55,7 +55,8 @@ Trait LaratrustMyUserTrait {
             throw new \InvalidArgumentException;
         }
 
-        $attributes = [$group => Helper::getIdFor($group, 'group')];
+        $group_key = Config::get('laratrust.foreign_keys.group');
+        $attributes = [$group_key => Helper::getIdFor($group, 'group')];
         $objectType = Str::singular($relationship);
         $object = Helper::getIdFor($object, $objectType);
 
@@ -226,5 +227,34 @@ Trait LaratrustMyUserTrait {
 
         return $rolePermission['pivot'][$teamForeignKey] == $team &&
          $rolePermission['pivot'][$groupForeignKey] == $group;
+    }
+
+    /**
+     * user's teams with role_name
+     * @param array|string $role_name
+     * @param Integer $club_id
+     * @return teams
+     */
+    public function teamsWithRoles($role_name, $club_id = null) {
+        $relation = $this->hasManyThrough(
+            Team::class,
+            RoleUser::class,
+            Config::get('laratrust.foreign_keys.user'),
+            'id',
+            'id',
+            Config::get('laratrust.foreign_keys.team')
+        );
+
+        $roles = is_array($role_name)
+            ? Role::whereIn('name', $role_name)->get(['id'])->pluck('id')->toArray()
+            : Role::where('name', $role_name)->firstOrFail()->id;
+
+        $club_id ? $relation->where('role_user.club_id', $club_id) : $relation->whereNull('role_user.club_id');
+
+        is_array($roles)
+            ? $relation->whereIn('role_id', $roles)
+            : $relation->where('role_id', $roles);
+
+        return $relation->distinct();
     }
 }
