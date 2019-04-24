@@ -111,7 +111,8 @@ Trait LaratrustMyUserTrait {
 
         $team = Helper::fetchTeam($team);
 
-        foreach ($this->cachedRoles() as $role) {
+        // TODO cache me
+        foreach ($this->roles as $role) {
             if ($role['name'] == $name && self::isInSameGroupTeam($role, $group, $team)) {
                 return true;
             }
