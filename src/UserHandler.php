@@ -61,8 +61,10 @@ class UserHandler extends HandlerAbstract {
 
     public function rules($action = null, $params = []) {
         $contactRules = config('larauser.contacts.rules.' . $this->role, []);
+
         $optionsRules = config('larauser.options.rules.' . $this->role, []);
         $rules = config('larauser.model.rules.default', []);
+        $rules = $rules($this->User);
         $userRules = config('larauser.model.rules.' . $this->role, []);
 
         return array_merge($rules, $userRules, $contactRules, $optionsRules);
