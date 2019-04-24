@@ -31,9 +31,9 @@ Trait LaratrustMyUserTrait {
     }
 
     public function systemRoles() {
-        $group_id = Config::get('laratrust.foreign_keys.group');
-        $team_id = Config::get('laratrust.foreign_keys.team');
-        return $this->roles()->whereNull($group_id)->whereNull($team_id);
+        $group_key = Config::get('laratrust.foreign_keys.group');
+        $team_key = Config::get('laratrust.foreign_keys.team');
+        return $this->roles()->whereNull($group_key)->whereNull($team_key);
     }
 
     // TODO move to group Trait
@@ -55,7 +55,6 @@ Trait LaratrustMyUserTrait {
             throw new \InvalidArgumentException;
         }
 
-        $group_id = Config::get('laratrust.foreign_keys.group');
         $attributes = [$group => Helper::getIdFor($group, 'group')];
         $objectType = Str::singular($relationship);
         $object = Helper::getIdFor($object, $objectType);
@@ -185,8 +184,8 @@ Trait LaratrustMyUserTrait {
             throw new InvalidArgumentException;
         }
 
-        $group_id = Config::get('laratrust.foreign_keys.group');
-        $attributes = [$group_id => Helper::getIdFor($group, 'group')];
+        $group_key = Config::get('laratrust.foreign_keys.group');
+        $attributes = [$group_key => Helper::getIdFor($group, 'group')];
         $objectType = Str::singular($relationship);
         $relationshipQuery = $this->$relationship();
 

@@ -1,7 +1,6 @@
 <?php namespace drkwolf\Larauser\Traits;
 
 use drkwolf\Larauser\Entities\Role;
-use drkwolf\Larauser\Entities\RoleUser;
 use Illuminate\Support\Collection;
 
 trait LaratrustTeamTrait {
@@ -16,10 +15,10 @@ trait LaratrustTeamTrait {
         return $this->hasManyThrough(
             Config::get('laratrust.models.user'),
             Config::get('laratrust.models.role_user'),
-            'team_id',
+            Config::get('laratrust.foreign_keys.team'),
             'id',
             'id',
-            'role_id'
+            Config::get('laratrust.foreign_keys.role')
         );
     }
 
@@ -29,13 +28,14 @@ trait LaratrustTeamTrait {
      */
     public function usersWithRole($roles) {
         $query = $this->users();
+        $role_key = Config::get('laratrust.foreign_keys.role');
         if (is_array($roles)) {
             $role_id = Role::whereIn('name', $roles)->get(['id'])->pluck('id')->toArray();
-            return $query->wherePivotIn('role_id', $role_id)
-                ->withPivot('role_id');
+            return $query->wherePivotIn($role_key, $role_id)
+                ->withPivot($role_key);
         } else {
             $role_id = Role::where('name', $roles)->firstOrFail()->id;
-            return $query->wherePivot('role_id', $role_id);
+            return $query->wherePivot($role_key, $role_id);
         }
 
     }
@@ -48,15 +48,17 @@ trait LaratrustTeamTrait {
 
     public function detachRoleAllUsers($role) {
         $users = $this->usersWithRole($role)->get();
+        $group_key = Config::get('laratrust.foreign_keys.group');
         $ids = [];
         foreach ($users as $user) {
             $ids[] = $user->id;
-            $user->detachGroupTeam($role, $this->group_id, $this->id);
+            $user->detachGroupTeam($role, $this->{$group_key}, $this->id);
         }
         return $ids;
     }
 
     public function detachRoleUsers($role, $usersIds) {
+        $group_key = Config::get('laratrust.foreign_keys.group');
         $usersIds = is_array($usersIds) ? $usersIds : [$usersIds];
 
         $users = $this->group->usersWithRole($role)
@@ -66,12 +68,14 @@ trait LaratrustTeamTrait {
         $ids = [];
         foreach ($users as $user) {
             $ids[] = $user->id;
-            $user->detachGroupTeam($role, $this->group_id, $this->id);
+            $user->detachGroupTeam($role, $this->{$group_key}, $this->id);
         }
         return $ids;
     }
 
     public function syncRoleUsers($role, array $usersIds) {
+        $group_key = Config::get('laratrust.foreign_keys.group');
+
         /** @var Collection $oldIds  */
         $oldUsers = $this->usersWithRole($role)->get(['id']);
         /** @var Collection $users  */
@@ -93,20 +97,13 @@ trait LaratrustTeamTrait {
         $users = $this->group->usersWithRole($role)
             ->whereIn('id', $allUsersIds)
             ->get();
-//        dump(
-////            'usersIds', $usersIds,
-//            'newIds', $newIds,
-////            'attachIds', $attachIds,
-////            'detachIds', $detachIds
-//        'union', $users->pluck('id')
-//        );
 
         foreach ($users as $user) {
             if ($attachIds->contains($user->id)) {
-                $user->attachGroupTeam($role, $this->group_id, $this->id);
+                $user->attachGroupTeam($role, $this->{$group_key}, $this->id);
                 $attach->push($user);
             } else if ($detachIds->contains($user->id)) {
-                $user->detachGroupTeam($role, $this->group_id, $this->id);
+                $user->detachGroupTeam($role, $this->{$group_key}, $this->id);
                 $detach->push($user);
             }
         }
@@ -115,6 +112,7 @@ trait LaratrustTeamTrait {
     }
 
     public function detachUsersByRole($role, array $usersIds) {
+        $group_key = Config::get('laratrust.foreign_keys.group');
         $detached = collect();
         $users = $this->group->usersWithRole($role)
             ->whereIn('id', $usersIds)
@@ -122,7 +120,7 @@ trait LaratrustTeamTrait {
             ->get();
 
         foreach ($users as $user) {
-            $user->detachGroupTeam($role, $this->group_id, $this->id);
+            $user->detachGroupTeam($role, $this->{$group_key}, $this->id);
             $detached->push($user);
         }
 
@@ -134,12 +132,13 @@ trait LaratrustTeamTrait {
      * user_id team_id group_id assigned with role_id
      */
     public function attachUsersByRole($role, array $usersIds) {
+        $group_key = Config::get('laratrust.foreign_keys.group');
         $attached = collect();
         $users = $this->group->usersWithRole($role)
             ->whereIn('id', $usersIds)->distinct()->get();
         // dump($usersIds, $users);
         foreach ($users as $user) {
-            $user->attachGroupTeam($role, $this->group_id, $this->id);
+            $user->attachGroupTeam($role, $this->{$group_key}, $this->id);
             $attached->push($user);
         }
 
