@@ -64,7 +64,9 @@ class UserHandler extends HandlerAbstract {
 
         $optionsRules = config('larauser.options.rules.' . $this->role, []);
         $rules = config('larauser.model.rules.default', []);
-        $rules = $rules($this->User);
+        if (is_callable($rules)) {
+            $rules = $rules($this->User);
+        }
         $userRules = config('larauser.model.rules.' . $this->role, []);
 
         return array_merge($rules, $userRules, $contactRules, $optionsRules);
