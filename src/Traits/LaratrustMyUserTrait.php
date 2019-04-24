@@ -237,17 +237,18 @@ Trait LaratrustMyUserTrait {
      */
     public function teamsWithRoles($role_name, $club_id = null) {
         $relation = $this->hasManyThrough(
-            Team::class,
-            RoleUser::class,
+        Config::get('laratrust.models.team'),
+        Config::get('laratrust.models.role'),
             Config::get('laratrust.foreign_keys.user'),
             'id',
             'id',
             Config::get('laratrust.foreign_keys.team')
         );
 
+        $RoleModel = Config::get('laratrust.models.role');
         $roles = is_array($role_name)
-            ? Role::whereIn('name', $role_name)->get(['id'])->pluck('id')->toArray()
-            : Role::where('name', $role_name)->firstOrFail()->id;
+            ? $RoleModel::whereIn('name', $role_name)->get(['id'])->pluck('id')->toArray()
+            : $RoleModel::where('name', $role_name)->firstOrFail()->id;
 
         $club_id ? $relation->where('role_user.club_id', $club_id) : $relation->whereNull('role_user.club_id');
 
