@@ -36,7 +36,7 @@ trait LaratrustGroupTrait {
             Config::get('laratrust.foreign_keys.group'),
             'id',
             'id',
-            'user_id'
+            Config::get('laratrust.foreign_keys.user')
         );
 
         if ($rolename === null) return $relation->distinct(); // all users
