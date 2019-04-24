@@ -33,7 +33,7 @@ trait LaratrustGroupTrait {
         $relation = $this->hasManyThrough(
             Config::get('laratrust.models.user'),
             Config::get('laratrust.models.role_user'),
-            'group_id',
+            Config::get('laratrust.foreign_keys.group'),
             'id',
             'id',
             'user_id'
