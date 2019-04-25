@@ -238,7 +238,7 @@ Trait LaratrustMyUserTrait {
     public function teamsWithRoles($role_name, $club_id = null) {
         $relation = $this->hasManyThrough(
         Config::get('laratrust.models.team'),
-        Config::get('laratrust.models.role'),
+        Config::get('laratrust.models.role_user'),
             Config::get('laratrust.foreign_keys.user'),
             'id',
             'id',
