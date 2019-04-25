@@ -2,6 +2,7 @@
 
 use drkwolf\Larauser\Entities\Role;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 
 trait LaratrustTeamTrait {
 
@@ -10,6 +11,13 @@ trait LaratrustTeamTrait {
      | Relationships
      |------------------------------------------------------
      */
+
+    public function Group() {
+        return $this->belongsTo(
+            config('laratrust.models.group'),
+            config('laratrust.foreign_keys.group', 'group_id')
+        );
+    }
 
     public function Roles() {
         return $this->hasManyThrough(
@@ -63,7 +71,7 @@ trait LaratrustTeamTrait {
 
         $users = $this->group->usersWithRole($role)
             ->whereIn('id', $usersIds)
-            ->distinct()->get();
+            ->distinct('users.id')->get();
 
         $ids = [];
         foreach ($users as $user) {
