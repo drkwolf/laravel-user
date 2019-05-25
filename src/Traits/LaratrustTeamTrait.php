@@ -87,7 +87,7 @@ trait LaratrustTeamTrait {
         /** @var Collection $oldIds  */
         $oldUsers = $this->usersWithRole($role)->get(['id']);
         /** @var Collection $users  */
-        $users = $this->usersWithRole($role)
+        $users = $this->group->usersWithRole($role)
             ->whereIn('id', $usersIds)
             ->distinct()->get();
 

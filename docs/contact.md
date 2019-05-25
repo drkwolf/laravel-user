@@ -37,7 +37,9 @@ class User extends Authenticatable {
 ```
 
 ## Configuration
-1. publish the configration
+
+1. publish the configuration
+
 ```bash
 php artisan vendor:publish --provider="drkwolf\Larauser\LarauserServiceProvider" --tag="config"
 ```
@@ -78,7 +80,7 @@ return [
 
 ## Usage
 
-```
+``` php
 $user = new User();
 $user->contact = [
     'address' => [
@@ -96,4 +98,5 @@ $user->contact = [
 ];
 $user->save();
 ```
+
 ## Default contact

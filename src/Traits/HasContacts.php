@@ -10,16 +10,15 @@ trait HasContacts {
 
     public function initializeHasContacts () {
         $this->defaultContactName = config('larauser.contact.default', '_default_');
-
         $this->attributes['contacts'] = json_encode(
             $this->contactAttributes($this->defaultContactName)
         );
         $this->casts['contacts'] = 'array';
-        $this->fillable[]  = 'contact';
+        $this->fillable[]        = 'contact';
     }
 
     private function contactAttributes($name) {
-        $attributes = config('larauser.contact.attributes', []);
+        $attributes     = config('larauser.contact.attributes', []);
         return [ $name => $attributes ];
     }
 
@@ -33,10 +32,9 @@ trait HasContacts {
 
     /*
     |---------------------------------------------------------------------
-    | default Contact Attrubute
+    | default Contact Attribute
     |---------------------------------------------------------------------
     */
-    
     public function setContactAttribute($value) {
         $this->setDefaultContactAttribute($value);
     }
@@ -72,7 +70,6 @@ trait HasContacts {
     | Credential
     |---------------------------------------------------------------------
     */
-
     public function getPhoneAttribute() {
         if (isset($this->attributes['phone']) ) {
             return $this->phoneAsObject($this->attributes['phone']);
@@ -86,6 +83,13 @@ trait HasContacts {
         $this->attributes['phone'] = Arr::get($value, 'prefix') . Arr::get($value, 'suffix');
     }
 
+    private function contactAsObject($phone) {
+        return [
+            'prefix' => substr($phone, 0, $split_nbr),
+            'suffix' => substr($phone, $split_nbr),
+            'number' => $phone
+        ];
+    }
 
     private function phoneAsObject($phone) {
         $split_nbr = $phone[0] == '+' ? 3 : 4; // 00## or +##
@@ -128,5 +132,4 @@ trait HasContacts {
         }
         return $contact;
     }
-
 }

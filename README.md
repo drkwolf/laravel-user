@@ -69,20 +69,26 @@ setup user model parameters
     // validation rules
     'rules' => [
         'default' => [
-            'first_name'    => 'required|string|max:50',
-            'last_name'     => 'required|string|max:50',
-            'birthdate'     => 'date|nullable',
-            'sex'           => 'nullable|in:M,F',
-            'email'         => 'nullable|email|unique:users,email',
-            // 'phone'         => 'nullable|unique:users,phone',
-        ],
-        'customer' => [
-            'birthdate'     => 'required|date|nullable',
-            'sex'           => 'required|in:M,F',
-        ],
-        'provider' => [
-            'sex'           => 'required|in:M,F',
+            'first_name'    => 'required|string|max:50'
+            // ...
         ]
+    ]
+]
+```
+
+rules can also be a function
+
+```php
+'model' => [
+    //...
+    'rules' => [
+        'default' => function ($user_model) {
+            return [
+                // ...
+                'email'         => 'nullable|email|unique:users,email' . ",{$user_model->id}"
+            ]
+        }
+        ],
     ]
 ]
 ```
@@ -118,7 +124,7 @@ same as UserHandler but doesn't handle options field
 
 ```php
 use drkwolf\Package\Presenter\DefaultPresenter as Presenter;
-// creating 
+// creating
 $presenter = new Presenter();
 $action = 'create'
 $response = UserHandler::resolve(
