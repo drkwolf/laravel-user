@@ -2,6 +2,7 @@
     "name": "drkwolf/laravel-user",
     "description": "laravel auth",
     "type": "library",
+    "version": "5.8.4",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "authors": [
