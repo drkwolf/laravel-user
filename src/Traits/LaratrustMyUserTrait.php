@@ -65,6 +65,7 @@ Trait LaratrustMyUserTrait {
 
             if (
             $this->$relationship()
+                ->wherePivot($group_key, $group)
                 ->wherePivot(Helper::teamForeignKey(), $team)
                 ->wherePivot(\Config::get("laratrust.foreign_keys.{$objectType}"), $object)
                 ->count()
